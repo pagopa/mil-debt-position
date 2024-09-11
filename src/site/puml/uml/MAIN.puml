@@ -1,0 +1,198 @@
+@startuml
+
+!pragma teoz true
+hide unlinked
+skinparam style strictuml
+skinparam maxMessageSize 200
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam sequenceLifeLineBackgroundColor GreenYellow
+
+participant "Client" as clt
+
+box Multichannel Integration Layer #GhostWhite
+	participant "mil-debt-position" as debt
+	participant "mil-auth" as auth
+end box
+
+participant "gpd-payments-pull" as pull
+
+!function $var($text)
+!return "<font color=green><i><" + $text + "></i></font>"
+!endfunction
+
+
+activate clt
+clt -> debt ++ : GET /paymentNotices
+	note left
+		__header__
+		Authorization: Bearer $var('client access token')
+		RequestId: $var('client request id')
+		AcquirerId: $var('acquirer id')
+		Channel: $var('channel')
+		MerchantId: $var('merchant id')
+		TerminalId: $var('terminal id')
+	end note
+
+group get access token
+	debt -> auth ++ : POST /token
+		note left
+			__header__
+			RequestId: $var('request id for access token')
+			Content-Type: application/x-www-form-urlencoded
+			__body__
+			grant_type=client_credentials&
+			client_id=$var('client id')&
+			client_secret=$var('client secret')
+		end note
+
+	auth --> debt -- : HTTP 200 (ok)
+		note right
+			__body__
+			{
+				"access_token": "$var('access token')",
+				"token_type": "Bearer",
+				"expires_in": $var('access token duration')
+			}
+		end note
+
+	note over debt #Orange
+		On any error, return 500 with specific error body
+	end note
+end group
+
+group get fiscal code from client token
+	debt -> auth ++ : POST /token_info
+		note left
+			__header__
+			Authorization: Bearer $var('access token')
+			RequestId: $var('request id for introspection')
+			Content-Type: application/json
+			__body__
+			{
+				"token": "$var('client access token')"
+			}
+		end note
+
+	auth --> debt -- : HTTP 200 (ok)
+		note right
+			__body__
+			{
+				"fiscalCode": "$var('fiscal code')"
+			}
+		end note
+
+	note over debt #Orange
+		On any error, return 500 with specific error body
+	end note
+end group
+
+group invoke pull-payment
+	debt -> pull ++ : GET /payment-notices/v1
+		note left
+			__header__
+			Ocp-Apim-Subscription-Key: $var('api key')
+			x-tax-code: $var('fiscal code')
+		end note
+	
+	pull --> debt -- : HTTP 200 (ok)
+		note right
+			__body__
+			[
+				.
+				.
+				.
+				{
+					"iupd": "//don't care//",
+					"debtorTaxCode": "//don't care//",
+					"debtorFullName": "//don't care//",
+					"debtorType": "//don't care//",
+					"paTaxCode": "//don't care//",
+					"paFullName": "//don't care//",
+					"insertedDate": "//don't care//",
+					"publishDate": "//don't care//",
+					"validityDate": "//don't care//",
+					"status": "//don't care//",
+					"lastUpdateDate": "//don't care//",
+					"paymentOptions": [
+						.
+						.
+						.
+						{
+							"description": "//don't care//",
+							"numberOfInstallments": //don't care//,
+							"amount": //don't care//,
+							"dueDate": "//don't care//",
+							"isPartialPayment": //don't care//,
+							"switchToExpired": //don't care//,
+							"installments": [
+								.
+								.
+								.
+								{
+									"nav": "$var('notice number #n.m.p')",
+									"iuv": "//don't care//",
+									"paTaxCode": "$var('pa tax code #n.m.p')",
+									"paFullName": "//don't care//",
+									"amount": $var('amount #n.m.p'),
+									"description": "$var('description #n.m.p')",
+									"dueDate": "$var('due date #n.m.p')",
+									"retentionDate": "//don't care//",
+									"insertedDate": "//don't care//",
+									"notificationFee": //don't care//,
+									"status": "//don't care//",
+									"lastUpdatedDate": "//don't care//"
+								}
+								.
+								.
+								.
+							]
+						}
+						.
+						.
+						.
+					]
+				}
+				.
+				.
+				.
+			]
+		end note
+
+		note over debt #Orange
+			On any error, return 500 with specific error body
+		end note
+		
+		note over debt #LightGreen
+			The positions, paymentOptions and installments returned are always payable:
+				- status is always VALID or PARTIALLY_PAID
+				- paymentOptions/dueDate and paymentOptions/installements/dueDate are always >= today
+				- paymentOptions/installements/status is always PO_UNPAID
+			
+			So there is no need to filter returned data.
+		end note
+end
+
+debt --> clt -- : HTTP 200 (ok)
+	note right
+		{
+			"debtPosition": [
+				.
+				.
+				.
+				{
+					"paTaxCode": "$var('pa tax code #n.m.p')",
+					"noticeNumber": "$var('notice number #n.m.p')",
+					"amount": $var('amount #n.m.p'),
+					"description": "$var('description #n.m.p')",
+					"dueDate": "2022-11-30"
+				}
+				.
+				.
+				.
+			]
+		}
+	end note
+deactivate clt
+
+@enduml
