@@ -34,7 +34,7 @@ public interface MilAuthClient {
     Uni<TokenInfoResponse> getFiscalCode(
             @HeaderParam("RequestId") @NotNull(message = ErrorCodes.ERROR_REQUESTID_MUST_NOT_BE_NULL_MSG)
             String requestId,
-            @HeaderParam("Authorization")  @NotNull(message = ErrorCodes.ERROR_AUTHORIZATION_MUST_NOT_BE_NULL_MSG)
+            @HeaderParam("Authorization") @NotNull(message = ErrorCodes.ERROR_AUTHORIZATION_MUST_NOT_BE_NULL_MSG)
             String authorization,
             TokenInfoRequest tokenInfoRequest);
 }

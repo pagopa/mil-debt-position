@@ -17,7 +17,7 @@ public class TokenResponse {
     private String type;
 
     @JsonProperty("expires_in")
-    private long expiresIn;
+    private Long expiresIn;
 
     @JsonProperty("access_token")
     private String token;

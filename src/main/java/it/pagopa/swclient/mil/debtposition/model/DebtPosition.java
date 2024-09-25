@@ -4,19 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.*;
 
+import java.util.List;
+
 @RegisterForReflection
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class TokenRequest {
-    @JsonProperty("grant_type")
-    private String grantType;
-
-    @JsonProperty("client_id")
-    private Long clientId;
-
-    @JsonProperty("client_secret")
-    private String clientSecret;
+@Builder
+public class DebtPosition {
+    @JsonProperty("debtPosition")
+    private List<Debt> debts;
 }
