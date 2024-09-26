@@ -139,9 +139,8 @@
 			<version>${otel-exporter-azure.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.microprofile.rest.client</groupId>
-			<artifactId>microprofile-rest-client-api</artifactId>
-			<version>4.0</version>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-rest-client-jackson</artifactId>
 		</dependency>
     </dependencies>
     

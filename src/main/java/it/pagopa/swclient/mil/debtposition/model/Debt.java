@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @ToString
+@Builder
 public class Debt {
     private Long paTaxCode;
     private Long noticeNumber;

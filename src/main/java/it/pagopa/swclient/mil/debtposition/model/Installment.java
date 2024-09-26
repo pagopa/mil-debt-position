@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @ToString
+@Builder
 public class Installment {
     private Long nav;
     private Long paTaxCode;
