@@ -16,7 +16,6 @@
 		<surefire-plugin.version>3.2.5</surefire-plugin.version>
 		<sonar-plugin.version>3.11.0.3922</sonar-plugin.version>
 		<jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-		<depcheck-plugin.version>1.2.1</depcheck-plugin.version>
 		<!-- Encodings -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -150,13 +149,6 @@
 			<url>https://maven.pkg.github.com/pagopa/mil-common</url>
 		</repository>
 	</repositories>
-	
-	<pluginRepositories>
-		<pluginRepository>
-			<id>github</id>
-			<url>https://maven.pkg.github.com/pagopa/depcheck</url>
-		</pluginRepository>
-	</pluginRepositories>
 
     <build>
         <plugins>
@@ -213,25 +205,6 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-            <plugin>
-				<groupId>it.pagopa.maven</groupId>
-				<artifactId>depcheck</artifactId>
-				<version>${depcheck-plugin.version}</version>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<fileName>dep-sha256.json</fileName>
-					<addFileName>dep-sha256-man.json</addFileName>
-					<includePlugins>false</includePlugins>
-					<includeParent>false</includeParent>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
