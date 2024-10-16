@@ -18,6 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 
+import java.lang.reflect.Field;
+import java.time.Instant;
+
 import static it.pagopa.swclient.mil.debtposition.util.TestData.REQUEST_ID;
 import static it.pagopa.swclient.mil.debtposition.util.TestData.VALID_TOKEN;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +59,24 @@ class MilAuthServiceTest {
         result.subscribe()
                 .with(token -> Assertions.assertEquals(tokenResponse, token));
     }
+
+    @Test
+    void testGetCachedToken_Success() throws NoSuchFieldException, IllegalAccessException {
+        Field cachedTokenField = MilAuthService.class.getDeclaredField("cachedAccessToken");
+        cachedTokenField.setAccessible(true);
+        cachedTokenField.set(milAuthService, tokenResponse);
+
+        tokenResponse.setExpiresIn(Instant.now().getEpochSecond() + 3600);
+
+        Uni<TokenResponse> result = milAuthService.getToken(REQUEST_ID);
+
+        result.subscribe()
+                .with(token -> Assertions.assertEquals(tokenResponse, token));
+
+        Mockito.verify(milAuthClient, Mockito.never())
+                .getToken(any(String.class), any(String.class), any(String.class), any(String.class));
+    }
+
 
     @Test
     void testGetToken_Error() {

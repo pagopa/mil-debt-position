@@ -9,6 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import java.time.Instant;
+
 @ApplicationScoped
 public class MilAuthService {
 
@@ -23,12 +25,21 @@ public class MilAuthService {
 
     private static final String GRANT_TYPE = "client_credentials";
 
+    private TokenResponse cachedAccessToken;
+
     public Uni<TokenResponse> getToken(String requestId) {
+        if (cachedAccessToken != null && cachedAccessToken.getExpiresIn() > Instant.now().getEpochSecond()) {
+            return Uni.createFrom().item(cachedAccessToken);
+        }
+
         return milAuthClient.getToken(requestId, GRANT_TYPE, clientId, clientSecret)
                 .onFailure()
                 .transform(error -> error)
                 .onItem()
-                .transform(tokenResponse -> tokenResponse);
+                .transform(tokenResponse -> {
+                    cachedAccessToken = tokenResponse;
+                    return tokenResponse;
+                });
     }
 
     public Uni<TokenInfoResponse> getTokenInfo(String requestId, String token, TokenInfoRequest request) {
