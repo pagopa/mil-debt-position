@@ -1,0 +1,93 @@
+{
+	"info": {
+		"_postman_id": "34345785-3985-4035-81d6-0d4159516ff4",
+		"name": "mil-debt-position",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29646859",
+		"_collection_link": "https://crimson-zodiac-456704.postman.co/workspace/Personal-Workspace~7804a326-503c-4623-9152-3f4c38f2d060/collection/29646859-34345785-3985-4035-81d6-0d4159516ff4?action=share&source=collection_link&creator=29646859"
+	},
+	"item": [
+		{
+			"name": "Get Debt Position",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "RequestId",
+						"value": "{{requestId}}",
+						"type": "text"
+					},
+					{
+						"key": "AcquirerId",
+						"value": "{{acquirerId}}",
+						"type": "text"
+					},
+					{
+						"key": "Channel",
+						"value": "{{channel}}",
+						"type": "text"
+					},
+					{
+						"key": "MerchantId",
+						"value": "{{merchantId}}",
+						"type": "text"
+					},
+					{
+						"key": "TerminalId",
+						"value": "{{terminalId}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{MIL_DEBT_POSITION_BASE_URL}}/paymentNotices",
+					"host": [
+						"{{MIL_DEBT_POSITION_BASE_URL}}"
+					],
+					"path": [
+						"paymentNotices"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NTg1NjI1LzAxMjM0NTY3IiwiYXVkIjoibWlsLnBhZ29wYS5pdCIsImlzcyI6Imh0dHBzOi8vZXhhbXBsZS5jb20vbWlsLWF1dGgiLCJjbGllbnRJZCI6ImQwZDY1NGU2LTk3ZGEtNDg0OC1iNTY4LTk5ZmVkY2NiNjQyYiIsImNoYW5uZWwiOiJBVE0iLCJhY3F1aXJlcklkIjoiNDU4NTYyNSIsInRlcm1pbmFsSWQiOiIwMTIzNDU2NyIsImlhdCI6MTY5NTgwMDAwMCwiZXhwIjoxNjk1ODAzNjAwLCJncm91cHMiOlsibWlsX2RlYnRfcG9zaXRpb25fYWRtaW4iXSwic2NhbGVEb2N1bWVudCI6eyJraWQiOiJraWQxMjMiLCJhbGciOiJSU0EtT0FFUC0yNTYiLCJ2YWx1ZSI6IlptRm5jWEI0RW5jb2RsZENvZGVGIn19.XvD-QzT0z7eL4kzLE8ODhtMpt1rdsJHpL2HLayvjuy_pMWGHNB2TuvTOfoBy2RUBffS-JUp1IqWo6iT8llcU-aVvxyN3JmeOMAlEl9oCZFWqHgHbbCnoLKlM4gDGAztFJSRsb6Fe1jQq2OPGZz6RzPzjGOBTjFDiFB5Teh5yJ0",
+			"type": "string"
+		}
+	]
+}
