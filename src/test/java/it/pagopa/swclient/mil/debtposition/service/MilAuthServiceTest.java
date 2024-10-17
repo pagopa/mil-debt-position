@@ -9,8 +9,9 @@ import it.pagopa.swclient.mil.debtposition.model.TokenInfoRequest;
 import it.pagopa.swclient.mil.debtposition.model.TokenInfoResponse;
 import it.pagopa.swclient.mil.debtposition.model.TokenResponse;
 import it.pagopa.swclient.mil.debtposition.util.TestData;
-import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,6 +25,8 @@ import java.time.Instant;
 import static it.pagopa.swclient.mil.debtposition.util.TestData.REQUEST_ID;
 import static it.pagopa.swclient.mil.debtposition.util.TestData.VALID_TOKEN;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 
 @QuarkusTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -73,7 +76,7 @@ class MilAuthServiceTest {
         result.subscribe()
                 .with(token -> Assertions.assertEquals(tokenResponse, token));
 
-        Mockito.verify(milAuthClient, Mockito.never())
+        Mockito.verify(milAuthClient, never())
                 .getToken(any(String.class), any(String.class), any(String.class), any(String.class));
     }
 
@@ -112,4 +115,67 @@ class MilAuthServiceTest {
                 .withSubscriber(UniAssertSubscriber.create())
                 .assertFailedWith(InternalServerErrorException.class);
     }
+
+    @Test
+    void testGetTokenInfo_Error401() {
+        Mockito.when(milAuthClient.getFiscalCode(any(String.class), any(String.class), any(TokenInfoRequest.class)))
+                .thenReturn(Uni.createFrom().failure(new WebApplicationException(401)));
+
+        Mockito.when(milAuthClient.getToken(any(String.class), any(String.class), any(String.class), any(String.class)))
+                .thenReturn(Uni.createFrom().item(tokenResponse));
+
+        Uni<TokenInfoResponse> result = milAuthService.getTokenInfo(REQUEST_ID, VALID_TOKEN, tokenInfoRequest);
+
+        result.subscribe()
+                .withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(WebApplicationException.class);
+    }
+
+    @Test
+    void testGetTokenInfo_Error403() {
+        Mockito.when(milAuthClient.getFiscalCode(any(String.class), any(String.class), any(TokenInfoRequest.class)))
+                .thenReturn(Uni.createFrom().failure(new WebApplicationException(403)));
+
+        Mockito.when(milAuthClient.getToken(any(String.class), any(String.class), any(String.class), any(String.class)))
+                .thenReturn(Uni.createFrom().item(tokenResponse));
+
+        Uni<TokenInfoResponse> result = milAuthService.getTokenInfo(REQUEST_ID, VALID_TOKEN, tokenInfoRequest);
+
+        result.subscribe()
+                .withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(WebApplicationException.class);
+    }
+
+    @Test
+    void testGetTokenInfo_ErrorNull() {
+        Mockito.when(milAuthClient.getFiscalCode(any(String.class), any(String.class), any(TokenInfoRequest.class)))
+                .thenReturn(Uni.createFrom().failure(new NullPointerException()));
+
+        Mockito.when(milAuthClient.getToken(any(String.class), any(String.class), any(String.class), any(String.class)))
+                .thenReturn(Uni.createFrom().item(tokenResponse));
+
+        Uni<TokenInfoResponse> result = milAuthService.getTokenInfo(REQUEST_ID, VALID_TOKEN, tokenInfoRequest);
+
+        result.subscribe()
+                .withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(NullPointerException.class);
+    }
+
+    @Test
+    void testGetTokenInfoWithNewToken_Success() {
+        Mockito.when(milAuthClient.getFiscalCode(any(String.class), any(String.class), any(TokenInfoRequest.class)))
+                .thenReturn(Uni.createFrom().failure(new WebApplicationException(401)));
+
+        Mockito.when(milAuthClient.getToken(any(String.class), any(String.class), any(String.class), any(String.class)))
+                .thenReturn(Uni.createFrom().item(tokenResponse));
+
+        Mockito.when(milAuthClient.getFiscalCode(any(String.class), eq(tokenResponse.getToken()), any(TokenInfoRequest.class)))
+                .thenReturn(Uni.createFrom().item(tokenInfoResponse));
+
+        Uni<TokenInfoResponse> result = milAuthService.getTokenInfo(REQUEST_ID, VALID_TOKEN, tokenInfoRequest);
+
+        result.subscribe()
+                .with(info -> Assertions.assertEquals(tokenInfoResponse, info));
+    }
+
 }
